@@ -1,0 +1,10 @@
+2013-2-12 Satiel
+	* Setup the new project using C#
+	* Created a test for the map height/width
+	* Setup test array for storing the tile information
+	* Created prototype of 'drawmap' method which will print out tiles
+	* Drew a test map using Console, useful methods:
+		- SetCursorPosition(x,y);
+		- Write();
+		- WriteLine();
+		- ReadKey();
