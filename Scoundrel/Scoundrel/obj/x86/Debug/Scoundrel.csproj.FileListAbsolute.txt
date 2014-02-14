@@ -1,0 +1,4 @@
+C:\Users\Satiel\Scoundrel_csharp\Scoundrel\Scoundrel\bin\Debug\Scoundrel.exe
+C:\Users\Satiel\Scoundrel_csharp\Scoundrel\Scoundrel\bin\Debug\Scoundrel.pdb
+C:\Users\Satiel\Scoundrel_csharp\Scoundrel\Scoundrel\obj\x86\Debug\Scoundrel.exe
+C:\Users\Satiel\Scoundrel_csharp\Scoundrel\Scoundrel\obj\x86\Debug\Scoundrel.pdb

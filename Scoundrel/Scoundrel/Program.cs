@@ -15,6 +15,10 @@ namespace ConsoleApplication1
         public const int tile_floor = 0;
         public const int tile_wall = 1;
 
+        // Player Position
+        public static int playerX = 10;
+        public static int playerY = 10;
+
         // Map declaration
 
         public static int[,] mapArray = new int[15, 20]
@@ -37,14 +41,12 @@ namespace ConsoleApplication1
 	    };
 
         // Function prototypes
-        public static void DrawMap()
+        static public  void DrawMap()
         {
             // draw loop
             for (int y = 0; y < map_height; y++)
             {
-                // move down ond row
-                Console.Out.NewLine = "\r\n";
-                Console.WriteLine();
+
 
                 for (int x = 0; x < map_width; x++)
                 {
@@ -64,20 +66,110 @@ namespace ConsoleApplication1
                             break;
                     }
                 }
+
+                // move down ond row
+                Console.Out.NewLine = "\r\n";
+                Console.WriteLine();
             }
 
-            Console.SetCursorPosition(10, 10);
-            Console.Write('@');
-            Console.ReadKey();
+
 
         }
 
-
-
-        static void Main(string[] args)
+         static bool  isPassable(int mapX, int mapY)
         {
-            Console.CursorVisible = false;
-            DrawMap();
+            // Before we do anything, make sure that the coordinates are valid
+            if (mapX < 0 || mapX >= map_width || mapY < 0 || mapY >= map_height)
+                return false;
+
+            // Store the value of the tile specified
+            int tileValue = mapArray[mapY, mapX];
+
+            // Return true if it's passable
+            if (tileValue == tile_floor)
+                return true;
+
+            // If execution gets here, it's not passsable
+            return false;
         }
+
+         static void Main(string[] args)
+         {
+             Console.CursorVisible = false;
+             //Console.SetCursorPosition(10, 10);
+             
+
+             while (true)
+             {
+                 // Clear hte console
+                 Console.Clear();
+
+                 // Draw the map
+                 DrawMap();
+
+                 // Set the player's new position
+                 Console.SetCursorPosition(playerX, playerY);
+
+                 // Draw the player
+                 Console.Write('@');
+
+                 // Draw the player to the screen
+
+                 // Input phase - wait for the player to do something
+                 var choice = Console.ReadKey();
+
+                 // Process the input
+                 switch (choice.Key)
+                 {
+
+                     // Move up
+                     case ConsoleKey.UpArrow:
+                         // Check if the player can go up
+                         if (isPassable(playerX, playerY-1))
+                         {
+                             // Move the player up
+                             playerY--;
+                         }
+                         break;
+
+                     // Move left
+                     case ConsoleKey.LeftArrow:
+                         // Check if the player can go left
+                         if (isPassable(playerX - 1, playerY))
+                         {
+                             // Move the player left
+                             playerX--;
+                         }
+                         break;
+
+                     // Move right
+                     case ConsoleKey.RightArrow:
+                         // Check if the player can go right
+                         if (isPassable(playerX + 1, playerY))
+                         {
+                             // Move the player right
+                             playerX++;
+                         }
+
+                         break;
+
+                     // Move down
+                     case ConsoleKey.DownArrow:
+                         // Check if the player can go down
+                         if (isPassable(playerX, playerY + 1))
+                         {
+                             // Move the player down
+                             playerY++;
+                         }
+                         break;
+
+                     // Ignore other keys
+                     default:
+                         break;
+                 }
+
+             }
+         }
+
     }
 }
