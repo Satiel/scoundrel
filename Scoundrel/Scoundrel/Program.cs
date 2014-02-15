@@ -14,10 +14,15 @@ namespace ConsoleApplication1
         // Tile Types
         public const int tile_floor = 0;
         public const int tile_wall = 1;
+        
 
         // Player Position
         public static int playerX = 10;
         public static int playerY = 10;
+
+        // Screen buffer
+        public static ScreenBuffer buffer = new ScreenBuffer();
+
 
         // Map declaration
 
@@ -33,48 +38,14 @@ namespace ConsoleApplication1
             { 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 	    };
 
-        // Function prototypes
-        static public  void DrawMap()
-        {
-            // draw loop
-            for (int y = 0; y < map_height; y++)
-            {
-
-
-                for (int x = 0; x < map_width; x++)
-                {
-                    // check the tile at that location
-                    switch (mapArray[y,x])
-                    {
-                        case 0:
-                            // draw a floor
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.Write('.');
-                            break;
-
-                        case 1:
-                            // draw a wall
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write('#');
-                            break;
-                    }
-                }
-
-                // move down ond row
-                Console.Out.NewLine = "\r\n";
-                Console.WriteLine();
-            }
-
-
-
-        }
+       
 
          static bool  isPassable(int mapX, int mapY)
         {
@@ -93,6 +64,12 @@ namespace ConsoleApplication1
             return false;
         }
 
+         public static void DrawScreen()
+         {
+             //iterate through buffer, adding each value to screenBuffer
+
+         }
+
          static void Main(string[] args)
          {
              Console.CursorVisible = false;
@@ -100,18 +77,17 @@ namespace ConsoleApplication1
              
 
              while (true)
-             {
-                 // Clear hte console
-                 Console.Clear();
-
-                 // Draw the map
-                 DrawMap();
+             {       
+                 // Draw the map                 
+                 buffer.DrawScreen(map_width, map_height, mapArray);
 
                  // Set the player's new position
                  Console.SetCursorPosition(playerX, playerY);
 
                  // Draw the player
                  Console.Write('@');
+                
+                 
 
                  // Draw the player to the screen
 
