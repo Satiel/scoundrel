@@ -26,7 +26,6 @@ namespace ConsoleApplication1
             listIndex.Add(new TileType('#', ConsoleColor.Red)); // tile wall
             listIndex.Add(new TileType('T', ConsoleColor.Green)); // tree
         
-
             //set cursor position to top left and draw the string
             Console.SetCursorPosition(0, 0);
 
@@ -42,31 +41,6 @@ namespace ConsoleApplication1
                     int type = map[y, x]; // Get the 'type' from the array
                     Console.ForegroundColor = listIndex[type].colorCode; // change the console color
                     Console.Write(listIndex[type].character); // print the character
-
-
-                    // check the tile at that location
-                    /**
-                    switch (mapArray[y, x])
-                    {
-                        case tile_floor:
-                            // draw a floor
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.Write('.');
-                            break;
-
-                        case tile_wall:
-                            // draw a wall
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write('#');
-                            break;
-
-                        case tile_tree:
-                            // draw a tree
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.Write('T');
-                            break;
-                    } **/
-                }
 
                 // move down ond row
                 Console.Out.NewLine = "\r\n";
