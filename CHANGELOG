@@ -1,3 +1,24 @@
+2013-2-16 Satiel
+	* Optimized movement code by creating 'delta' variables when user input is received
+		* Only check if the tile is passable once instead of once per possibility
+	* Added new tiles:
+		* Open door
+		* Closed door
+	* Added new user interaction:
+		* Open closed door
+	
+
+2013-2-15 Satiel
+	* Added a screen buffer that draws the entire screen without having to clear it - fixed 'flickering'
+	* Optimized code that draws tiles
+		* Created a 'TileType' class to keep track of the different types of tiles
+		* Created list of TileType in the main class to easily manage different types
+		* When drawing, loop gets the tile type from the list, gets the color from the list, gets the character from the list
+	* Removed old code, added some comments 
+
+2013-2-14 Satiel
+	* Added basic movemement using the arrow keys
+
 2013-2-12 Satiel
 	* Setup the new project using C#
 	* Created a test for the map height/width
