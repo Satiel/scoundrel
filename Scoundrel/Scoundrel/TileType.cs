@@ -8,13 +8,19 @@ namespace ConsoleApplication1
     class TileType 
     {
         // tile properties
-        public char character { get; set; }
-        public ConsoleColor colorCode { get; set; }
+        public char character { get; set; } // which character to use
+        public ConsoleColor colorCode { get; set; } // which color to use
+        public bool isPassable { get; set; } // is it passable or not
 
-        public TileType(char c, ConsoleColor s)
+        
+
+
+        public TileType(char c, ConsoleColor s, bool passable)
         {
             character = c;
             colorCode = s;
+            isPassable = passable;
+
         }
     }
 }

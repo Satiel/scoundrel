@@ -1,3 +1,8 @@
+2013-2-17 Satiel
+	* Moved over the bulk of the program to a new class - Game.cs
+		-> subsequently got rid of the 'static' issue, now looking more like XNA structure
+	* Fixed a bug where the player's position could be pushed forward with any key
+
 2013-2-16 Satiel
 	* Optimized movement code by creating 'delta' variables when user input is received
 		* Only check if the tile is passable once instead of once per possibility
