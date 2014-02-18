@@ -1,4 +1,9 @@
-2013-2-17 Satiel
+2013 2-18-13 Satiel
+	* Added item layer that can be drawn over the map layer, under the player layer
+	* Added a few basic item types
+	* Added code for properly drawing item layer
+
+2013-2-17-13 Satiel
 	* Moved over the bulk of the program to a new class - Game.cs
 		-> subsequently got rid of the 'static' issue, now looking more like XNA structure
 	* Fixed a bug where the player's position could be pushed forward with any key

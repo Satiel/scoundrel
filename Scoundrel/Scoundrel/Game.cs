@@ -21,11 +21,16 @@ namespace ConsoleApplication1
         public const int map_height = 15;
 
         // Tile Types
-        public const int tile_floor = 0;
-        public const int tile_wall = 1;
-        public const int tile_tree = 2;
-        public const int tile_closed_door = 3;
-        public const int tile_open_door = 4;
+        public const int TILE_FLOOR = 0;
+        public const int TILE_WALL = 1;
+        public const int TILE_TREE = 2;
+        public const int TILE_CLOSED_DOOR = 3;
+        public const int TILE_OPEN_DOOR = 4;
+
+        // Item Types
+        public const int ITEM_NONE = 0;
+        public const int ITEM_POTION = 1;
+        public const int ITEM_ROCK = 2;
 
         // Player Position
         public int playerX = 10;
@@ -36,6 +41,7 @@ namespace ConsoleApplication1
         // Screen buffer variables
         public int[,] map; // array to store passed-in mapArray
         public List<TileType> listIndex = new List<TileType>(); // list to store TileTypes
+        public List<ItemType> itemIndex = new List<ItemType>(); // list to store ItemTypes
 
         // Map declaration
 
@@ -58,6 +64,27 @@ namespace ConsoleApplication1
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 	    };
 
+        // Item map, overload on top of the world map
+        public int[,] itemArray = new int[15,20]
+        {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+	    };
+
+
          bool isPassable(int mapX, int mapY)
         {
             // Before we do anything, make sure that the coordinates are valid
@@ -76,12 +103,17 @@ namespace ConsoleApplication1
             // Save the map
             map = mapArray;
 
-            // Add tileTypes to the tileIndex
+            // Add TileTypes to the tileIndex
             listIndex.Add(new TileType('.', ConsoleColor.White, true)); // tile floor
             listIndex.Add(new TileType('#', ConsoleColor.Red, false)); // tile wall
             listIndex.Add(new TileType('T', ConsoleColor.Green, false)); // tree
             listIndex.Add(new TileType('/', ConsoleColor.Magenta, false)); // closed door
             listIndex.Add(new TileType('_', ConsoleColor.Magenta, true)); // open door
+
+            // Add ItemTypes to the ItemIndex
+            itemIndex.Add(new ItemType(' ', ConsoleColor.Gray, "EMPTY")); // (0) ITEM_NONE (unused inventory slot)
+            itemIndex.Add(new ItemType((char)176, ConsoleColor.Cyan, "Potion")); // (1) ITEM_POTION
+            itemIndex.Add(new ItemType('*', ConsoleColor.DarkGray, "Rock")); // (2) ITEM_ROCK
 
             //set cursor position to top left and draw the string
             Console.SetCursorPosition(0, 0);
@@ -93,11 +125,21 @@ namespace ConsoleApplication1
                 // Second loop through 2D Array
                 for (int x = 0; x < map_width; x++)
                 {
-
-                    // NEW WAY OF DRAWING TILES
-                    int type = map[y, x]; // Get the 'type' from the array
-                    Console.ForegroundColor = listIndex[type].colorCode; // change the console color
-                    Console.Write(listIndex[type].character); // print the character
+                    // check to see if there is an item present at this location
+                    if (itemArray[y, x] != ITEM_NONE)
+                    {
+                        // Draw the item instead of the tile
+                        int itemType = itemArray[y, x]; // get the 'type' from the item array
+                        Console.ForegroundColor = itemIndex[itemType].colorCode; // change the console color
+                        Console.Write(itemIndex[itemType].character); // print the character
+                    }
+                    else
+                    {
+                        // NEW WAY OF DRAWING TILES
+                        int type = map[y, x]; // Get the 'type' from the map array
+                        Console.ForegroundColor = listIndex[type].colorCode; // change the console color
+                        Console.Write(listIndex[type].character); // print the character
+                    }
 
                 }
 
@@ -157,10 +199,10 @@ namespace ConsoleApplication1
                     break;
             }
 
-            if (mapArray[playerY + deltaY, playerX + deltaX] == tile_closed_door)
+            if (mapArray[playerY + deltaY, playerX + deltaX] == TILE_CLOSED_DOOR)
             {
 
-                mapArray[playerY + deltaY, playerX + deltaX] = tile_open_door;
+                mapArray[playerY + deltaY, playerX + deltaX] = TILE_OPEN_DOOR;
                 Console.Clear();
                 DrawScreen(map_width, map_height, mapArray);
             }
