@@ -2,6 +2,10 @@
 	* Added item layer that can be drawn over the map layer, under the player layer
 	* Added a few basic item types
 	* Added code for properly drawing item layer
+	* Added player inventory
+	* Inventory is now drawn on screen
+	* Added new user interaction:
+		* Grab Item - pick up item from the world, store it in the player's inventory
 
 2013-2-17-13 Satiel
 	* Moved over the bulk of the program to a new class - Game.cs

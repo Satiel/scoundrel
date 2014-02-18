@@ -17,31 +17,35 @@ namespace ConsoleApplication1
             listIndex = null;
         }
         // Map dimensions
-        public const int map_width = 20;
-        public const int map_height = 15;
+        const int MAP_WIDTH = 20;
+        const int MAP_HEIGHT = 15;
 
         // Tile Types
         public const int TILE_FLOOR = 0;
-        public const int TILE_WALL = 1;
-        public const int TILE_TREE = 2;
-        public const int TILE_CLOSED_DOOR = 3;
-        public const int TILE_OPEN_DOOR = 4;
+          int TILE_WALL = 1;
+         const int TILE_TREE = 2;
+         const int TILE_CLOSED_DOOR = 3;
+         const int TILE_OPEN_DOOR = 4;
 
         // Item Types
-        public const int ITEM_NONE = 0;
-        public const int ITEM_POTION = 1;
-        public const int ITEM_ROCK = 2;
+         const int ITEM_NONE = 0;
+         const int ITEM_POTION = 1;
+         const int ITEM_ROCK = 2;
 
         // Player Position
-        public int playerX = 10;
-        public int playerY = 10;
-        public int saved_playerX = 0;
-        public int saved_playerY = 0;
+         int playerX = 10;
+         int playerY = 10;
+         int saved_playerX = 0;
+         int saved_playerY = 0;
+
+        // Player inventory
+         int[] inventory = new int[10] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+         const int INVENTORY_SLOTS = 10;
 
         // Screen buffer variables
-        public int[,] map; // array to store passed-in mapArray
-        public List<TileType> listIndex = new List<TileType>(); // list to store TileTypes
-        public List<ItemType> itemIndex = new List<ItemType>(); // list to store ItemTypes
+         int[,] map; // array to store passed-in mapArray
+         List<TileType> listIndex = new List<TileType>(); // list to store TileTypes
+         List<ItemType> itemIndex = new List<ItemType>(); // list to store ItemTypes
 
         // Map declaration
 
@@ -88,7 +92,7 @@ namespace ConsoleApplication1
          bool isPassable(int mapX, int mapY)
         {
             // Before we do anything, make sure that the coordinates are valid
-            if (mapX < 0 || mapX >= map_width || mapY < 0 || mapY >= map_height)
+            if (mapX < 0 || mapX >= MAP_WIDTH || mapY < 0 || mapY >= MAP_HEIGHT)
                 return false;
 
             // Store the value of the tile specified
@@ -98,7 +102,7 @@ namespace ConsoleApplication1
             return listIndex[tileValue].isPassable;
         }
 
-        public void DrawScreen(int map_width, int map_height, int[,] mapArray)
+        public void DrawScreen(int MAP_WIDTH, int MAP_HEIGHT, int[,] mapArray)
         {
             // Save the map
             map = mapArray;
@@ -119,11 +123,11 @@ namespace ConsoleApplication1
             Console.SetCursorPosition(0, 0);
 
             // First loop through 2D Array
-            for (int y = 0; y < map_height; y++)
+            for (int y = 0; y < MAP_HEIGHT; y++)
             {
 
                 // Second loop through 2D Array
-                for (int x = 0; x < map_width; x++)
+                for (int x = 0; x < MAP_WIDTH; x++)
                 {
                     // check to see if there is an item present at this location
                     if (itemArray[y, x] != ITEM_NONE)
@@ -204,9 +208,62 @@ namespace ConsoleApplication1
 
                 mapArray[playerY + deltaY, playerX + deltaX] = TILE_OPEN_DOOR;
                 Console.Clear();
-                DrawScreen(map_width, map_height, mapArray);
+                DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
             }
 
+        }
+
+        // CREATE CLOSE DOOR FUNCTION
+
+        // display the player's inventory
+        public void ShowInventory()
+        {
+            string a = "A";
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.SetCursorPosition(MAP_WIDTH + 2, 1);
+            Console.WriteLine("INVENTORY");
+            Console.SetCursorPosition(MAP_WIDTH + 2, 2);
+            Console.WriteLine("----------");
+
+            for (int i = 0; i < INVENTORY_SLOTS; i++)
+            {
+                // grab the item type being store in this inventory slot
+                int itemType = inventory[i];
+
+                // Draw the items name to the console
+                Console.SetCursorPosition(MAP_WIDTH + 2, 3 + i);
+                Console.Write((char)((int)'A' + i));
+                Console.Write(": " + itemIndex[itemType].name);
+            }
+        }
+
+        public void GetCommand()
+        {
+            // First check to see if there's actually an item present underneath the player
+            if (itemArray[playerY, playerX] == ITEM_NONE)
+            {
+                // Complain that there isn't an item here
+
+                // Abore the rest of the command
+                return;
+            }
+
+            // Iterate through the inventory, checking for the first available slot
+            for (int i = 0; i < INVENTORY_SLOTS; i++)
+            {
+                // Found an open slot?
+                if (inventory[i] == ITEM_NONE)
+                {
+                    // Move the item to the slot and remove it from the world
+                    inventory[i] = itemArray[playerY, playerX];
+                    itemArray[playerY, playerX] = ITEM_NONE;
+                    return;
+                }
+            }
+            // Do stuff
+
+            // If execution gets here, it means that there are no open slots available.
+            // Complain about it
         }
 
         public void Main()
@@ -221,7 +278,10 @@ namespace ConsoleApplication1
             while (true)
             {
                 // Draw the map                 
-                DrawScreen(map_width, map_height, mapArray);
+                DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
+
+                // Draw the inventory
+                ShowInventory();
 
                 // Set the player's new position
                 Console.SetCursorPosition(playerX, playerY);
@@ -271,7 +331,7 @@ namespace ConsoleApplication1
 
                     // Open door
                     case ConsoleKey.O:
-                        DrawScreen(map_width, map_height, mapArray);
+                        DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
                         //Console.SetCursorPosition(2, 22);
                         OpenDoorCommand();                        
                         // do stuff
@@ -280,6 +340,12 @@ namespace ConsoleApplication1
                     // Close door
                     case ConsoleKey.C:
                         // do stuff
+                        break;
+
+                    // Get item
+                    case ConsoleKey.G:
+                        // grab item
+                        GetCommand();
                         break;
 
                     // Ignore other keys
