@@ -22,7 +22,7 @@ namespace ConsoleApplication1
 
         // Tile Types
         public const int TILE_FLOOR = 0;
-          int TILE_WALL = 1;
+         const int TILE_WALL = 1;
          const int TILE_TREE = 2;
          const int TILE_CLOSED_DOOR = 3;
          const int TILE_OPEN_DOOR = 4;
@@ -35,8 +35,6 @@ namespace ConsoleApplication1
         // Player Position
          int playerX = 10;
          int playerY = 10;
-         int saved_playerX = 0;
-         int saved_playerY = 0;
 
         // Player inventory
          int[] inventory = new int[10] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -239,6 +237,7 @@ namespace ConsoleApplication1
 
         public void GetCommand()
         {
+           
             // First check to see if there's actually an item present underneath the player
             if (itemArray[playerY, playerX] == ITEM_NONE)
             {
@@ -268,8 +267,28 @@ namespace ConsoleApplication1
 
         public void DropCommand()
         {
+
+            Console.Clear();
+            DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
+            // Draw the inventory
+            ShowInventory();
+
+            // Set the player's new position
+            Console.SetCursorPosition(playerX, playerY);
+
+            // Draw the player
+            Console.Write('@');
+
+
+
             char a = 'a';
             // Ask the user which inventory slot they're trying to drop
+
+
+            // THIS IS A TEMPORARY FIX FOR THE ISSUE WHERE
+            // PLAYER INPUT GETS DISPLAYED ON THE SCREEN
+            // BY THE PLAYER ICON WHEN INITIALLY TYPING - FIND BETTER FIX FOR THIS
+            Console.CursorVisible = true;
             Console.SetCursorPosition(2, MAP_HEIGHT);
             Console.WriteLine("Drop from which inventory slot?");
             var choice = Console.ReadKey();
@@ -304,6 +323,7 @@ namespace ConsoleApplication1
 
                 // Place the item on the ground
                 itemArray[playerY, playerX] = inventory[slot];
+                Console.Clear();
                 inventory[slot] = ITEM_NONE;
             }
 
@@ -311,7 +331,7 @@ namespace ConsoleApplication1
 
         public void Main()
         {
-            Console.CursorVisible = false;
+            
             //Console.SetCursorPosition(10, 10);
 
             // delta movement variables
@@ -320,6 +340,7 @@ namespace ConsoleApplication1
 
             while (true)
             {
+                Console.CursorVisible = false;
                 // Draw the map                 
                 DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
 
@@ -388,6 +409,7 @@ namespace ConsoleApplication1
                     // Get item
                     case ConsoleKey.G:
                         // grab item
+                        
                         GetCommand();
                         break;
 
@@ -401,8 +423,11 @@ namespace ConsoleApplication1
                         break;
                 }
 
+                
+
                 if (isPassable(playerX + deltaX, playerY + deltaY) )
                 {
+                    
                     // If allowed, move in that direction
                     playerX += deltaX;
                     playerY += deltaY;

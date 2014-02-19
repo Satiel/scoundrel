@@ -9,6 +9,11 @@
 	* Added new user interaction:
 		* Drop Item - allows the player to choose an item in their inventory and drop it
 		on the ground, as long as there is nothing in that spot
+	* Fixed bug where inventory slots weren't getting written properly after dropping 
+	  an item that was previously in the player's inventory
+	* Fixed bug where the character players hit to start a command would display
+	  on-screen by the character icon instead of now appearing at all
+		Ex. You hit 'o' to open door but 'o' would also type on the screen, which looks stupid.
 
 2013-2-17-13 Satiel
 	* Moved over the bulk of the program to a new class - Game.cs
