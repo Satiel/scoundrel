@@ -218,7 +218,7 @@ namespace ConsoleApplication1
         // display the player's inventory
         public void ShowInventory()
         {
-            string a = "A";
+            
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.SetCursorPosition(MAP_WIDTH + 2, 1);
             Console.WriteLine("INVENTORY");
@@ -264,6 +264,49 @@ namespace ConsoleApplication1
 
             // If execution gets here, it means that there are no open slots available.
             // Complain about it
+        }
+
+        public void DropCommand()
+        {
+            char a = 'a';
+            // Ask the user which inventory slot they're trying to drop
+            Console.SetCursorPosition(2, MAP_HEIGHT);
+            Console.WriteLine("Drop from which inventory slot?");
+            var choice = Console.ReadKey();
+
+            
+
+            // Convert the key press into an inventory slot
+            int slot = choice.KeyChar - (int)a;
+
+            // Verify that this is a valid slot
+            if (slot < 0 || slot >= INVENTORY_SLOTS)
+            {
+                // Complain to the user
+                Console.SetCursorPosition(2, MAP_HEIGHT + 3);
+                Console.WriteLine("Invalid slot");
+            }
+                // This is a valid slot, PLACE IT!
+            else if (inventory[slot] == ITEM_NONE)
+            {
+                // Complain to the user
+                Console.SetCursorPosition(2, MAP_HEIGHT + 3);
+                Console.WriteLine("No item present");
+            }
+
+            else if (itemArray[playerY, playerX] != ITEM_NONE)
+            {
+
+            }
+
+            else
+            {
+
+                // Place the item on the ground
+                itemArray[playerY, playerX] = inventory[slot];
+                inventory[slot] = ITEM_NONE;
+            }
+
         }
 
         public void Main()
@@ -346,6 +389,11 @@ namespace ConsoleApplication1
                     case ConsoleKey.G:
                         // grab item
                         GetCommand();
+                        break;
+
+                    case ConsoleKey.D:
+                        // drop item
+                        DropCommand();
                         break;
 
                     // Ignore other keys

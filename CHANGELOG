@@ -6,6 +6,9 @@
 	* Inventory is now drawn on screen
 	* Added new user interaction:
 		* Grab Item - pick up item from the world, store it in the player's inventory
+	* Added new user interaction:
+		* Drop Item - allows the player to choose an item in their inventory and drop it
+		on the ground, as long as there is nothing in that spot
 
 2013-2-17-13 Satiel
 	* Moved over the bulk of the program to a new class - Game.cs
@@ -31,7 +34,7 @@
 	* Removed old code, added some comments 
 
 2013-2-14 Satiel
-	* Added basic movemement using the arrow keys
+	* Added basic movement using the arrow keys
 
 2013-2-12 Satiel
 	* Setup the new project using C#
