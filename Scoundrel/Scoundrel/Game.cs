@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace ConsoleApplication1
 {
@@ -21,7 +22,7 @@ namespace ConsoleApplication1
         const int MAP_HEIGHT = 15;
 
         // Tile Types
-        public const int TILE_FLOOR = 0;
+        const int TILE_FLOOR = 0;
         const int TILE_WALL = 1;
         const int TILE_TREE = 2;
         const int TILE_CLOSED_DOOR = 3;
@@ -39,18 +40,22 @@ namespace ConsoleApplication1
         int playerX = 10;
         int playerY = 10;
 
+        // Player progress
+        int currentLevel = 1;
+
         // Player inventory
         int[] inventory = new int[10] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         const int INVENTORY_SLOTS = 10;
 
         // Screen buffer variables
-        int[,] map; // array to store passed-in mapArray
+        int[,] map; // array to store passed-in levelOneArray
         List<TileType> listIndex = new List<TileType>(); // list to store TileTypes
         List<ItemType> itemIndex = new List<ItemType>(); // list to store ItemTypes
 
         // Map declaration
+        /** OLD MAP
 
-        public int[,] mapArray = new int[15, 20]
+        public int[,] levelOneArray = new int[15, 20]
         {
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -67,7 +72,10 @@ namespace ConsoleApplication1
             { 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-	    };
+	    }; **/
+
+        // Map as read from the text document
+        public int[,] levelOneArray = new int[15, 20];
 
         // Item map, overload on top of the world map
         public int[,] itemArray = new int[15,20]
@@ -89,6 +97,62 @@ namespace ConsoleApplication1
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 	    };
 
+        // Screen variables
+        Screen screen = null;
+        public char smChoice;
+
+        public void readLevel()
+        {
+            
+            StreamReader sr = new StreamReader("level1.txt");
+
+                // Read the current character
+
+
+                for (int y = 0; y < MAP_HEIGHT; y++)
+                {
+
+                    for (int x = 0; x < MAP_WIDTH; x++)
+                    {
+                        int currentChar;
+
+                            currentChar = sr.Read();
+
+
+                        currentChar -= 48;
+
+                       switch (currentChar)
+                        {
+                            case 0:
+                            // Add 0 to array
+                                levelOneArray[y, x] = 0;
+                                break;
+                           case 1:
+                               levelOneArray[y,x] = 1;
+                               break;
+                           case 2:
+                               levelOneArray[y, x] = 2;
+                               break;
+
+                           case 3:
+                               levelOneArray[y, x] = 3;
+                               break;
+
+                           case 4:
+                               levelOneArray[y, x] = 4;
+                               break; 
+
+                            default:
+                                break;
+                        }
+                    }
+
+                    sr.ReadLine();
+                }
+
+            
+
+        }
 
          bool isPassable(int mapX, int mapY)
         {
@@ -97,16 +161,16 @@ namespace ConsoleApplication1
                 return false;
 
             // Store the value of the tile specified
-            int tileValue = mapArray[mapY, mapX];
+            int tileValue = levelOneArray[mapY, mapX];
 
             // Return if it's passable or not
             return listIndex[tileValue].isPassable;
         }
 
-        public void DrawScreen(int MAP_WIDTH, int MAP_HEIGHT, int[,] mapArray)
+        public void DrawScreen(int MAP_WIDTH, int MAP_HEIGHT, int[,] levelOneArray)
         {
             // Save the map
-            map = mapArray;
+            map = levelOneArray;
 
             // Add TileTypes to the tileIndex
             listIndex.Add(new TileType('.', ConsoleColor.White, true)); // tile floor
@@ -159,6 +223,69 @@ namespace ConsoleApplication1
 
         }
 
+        public void DrawStartMenu()
+        {
+            Console.SetCursorPosition(10, 10);
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("This is the start screen. GG.");
+
+            // Let the user type
+            ConsoleKey smKey = Console.ReadKey().Key;
+            
+            // Change the screen based on the key input
+            switch (smKey)
+            {
+                // Clear the screen and start the game
+                case ConsoleKey.P:
+                    // Play the game
+                    Console.Clear();
+                    screen.CurrentPhase = Screen.Phase.Play;
+                    break;
+
+                case ConsoleKey.Escape:
+                    // Quit the game
+                    Environment.Exit(0);
+                    break;
+
+                default:
+                    // Draw the start screen again until a valid option is chosen
+                    DrawStartMenu();
+                    break;
+            }
+                    
+        }
+
+        public void DrawPauseMenu()
+        {
+            Console.SetCursorPosition(10, 10);
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("This is the pause menu.");
+
+            // Let the user type
+            ConsoleKey smKey = Console.ReadKey().Key;
+
+            // Change the screen based on the key input
+            switch (smKey)
+            {
+                // Clear the screen and start the game
+                case ConsoleKey.P:
+                    // Play the game
+                    Console.Clear();
+                    screen.CurrentPhase = Screen.Phase.Play;
+                    break;
+
+                case ConsoleKey.Escape:
+                    // Quit the game
+                    Environment.Exit(0);
+                    break;
+
+                default:
+                    // Draw the start screen again until a valid option is chosen
+                    DrawStartMenu();
+                    break;
+            }
+        }
+
         public void OpenDoorCommand()
         {
             // Draw some notifcation to the user
@@ -207,12 +334,12 @@ namespace ConsoleApplication1
                     break;
             }
 
-            if (mapArray[playerY + deltaY, playerX + deltaX] == TILE_CLOSED_DOOR)
+            if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_CLOSED_DOOR)
             {
 
-                mapArray[playerY + deltaY, playerX + deltaX] = TILE_OPEN_DOOR;
+                levelOneArray[playerY + deltaY, playerX + deltaX] = TILE_OPEN_DOOR;
                 Console.Clear();
-                DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
+                DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
             }
 
         }
@@ -454,7 +581,7 @@ namespace ConsoleApplication1
                     break;
             }
 
-            if (mapArray[playerY + deltaY, playerX + deltaX] != TILE_WALL)
+            if (levelOneArray[playerY + deltaY, playerX + deltaX] != TILE_WALL)
             {
                 // Complain to the user
                 ClearText();
@@ -466,7 +593,7 @@ namespace ConsoleApplication1
             }
 
             // change the selected tile from a wall to a rock floor
-            mapArray[playerY + deltaY, playerX + deltaX] = TILE_FLOOR;
+            levelOneArray[playerY + deltaY, playerX + deltaX] = TILE_FLOOR;
 
             // place a rock there to simulate rubble
             itemArray[playerY + deltaY, playerX + deltaX] = ITEM_ROCK;
@@ -513,6 +640,8 @@ namespace ConsoleApplication1
                     deltaY = -1;
                     break;
 
+
+
                 // Not a valid direction
                 default:
                     // no direction specified, so abort
@@ -521,10 +650,10 @@ namespace ConsoleApplication1
             }
 
             // If there's a locked door, unlocked it
-            if (mapArray[playerY + deltaY, playerX + deltaX] == TILE_LOCKED_DOOR)
+            if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_LOCKED_DOOR)
             {
                 // unlock the door
-                mapArray[playerY + deltaY, playerX + deltaX] = TILE_CLOSED_DOOR;
+                levelOneArray[playerY + deltaY, playerX + deltaX] = TILE_CLOSED_DOOR;
 
                 // Let the user know everything went well
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
@@ -534,10 +663,10 @@ namespace ConsoleApplication1
             }
 
             // lock an unlocked door
-            else if (mapArray[playerY + deltaY, playerX + deltaX] == TILE_CLOSED_DOOR)
+            else if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_CLOSED_DOOR)
             {
                 // lock the door
-                mapArray[playerY + deltaY, playerX + deltaX] = TILE_LOCKED_DOOR;
+                levelOneArray[playerY + deltaY, playerX + deltaX] = TILE_LOCKED_DOOR;
 
                 // Let the user know everything went well
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
@@ -545,7 +674,7 @@ namespace ConsoleApplication1
 
             }
             // catch when the user tries to lock an open door, warn them
-            else if (mapArray[playerY + deltaY, playerX + deltaX] == TILE_OPEN_DOOR)
+            else if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_OPEN_DOOR)
             {
                 // warn the user
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
@@ -563,13 +692,18 @@ namespace ConsoleApplication1
         }
 
     
-
+        /// <summary>
+        /// Function to clear the on-screen text (instead of Console.Clear())
+        /// to ensure that text being overwritten can't be seen in the background
+        /// if the previous strings were longer than the new ones
+        /// i.e. if you write 'axe' where 'potion' was, you shouldn't be able to see 'axeion'
+        /// </summary>
         public void ClearText()
         {
                         /** COMMANDS TO FIX INVENTORY TEXT ISSUES **/
 
             Console.Clear();
-            DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
+            DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
             // Draw the inventory
             ShowInventory();
 
@@ -580,10 +714,26 @@ namespace ConsoleApplication1
             Console.Write('@');
         }
 
+        public void Update()
+        {
+            // First check of the game, see if the screen has been initialized
+            // If it hasn't, let's give the player the Start menu
+
+            if (screen == null)
+            {
+                // Show the start menu
+                screen = new Screen();
+
+                // Set the phase of the screen to the Start screen
+                screen.CurrentPhase = Screen.Phase.Start;
+            }
+        }
+
         public void Main()
         {
-            
-            //Console.SetCursorPosition(10, 10);
+
+
+            readLevel();
 
             // delta movement variables
             int deltaX = 0;
@@ -591,107 +741,145 @@ namespace ConsoleApplication1
 
             while (true)
             {
-                Console.CursorVisible = false;
-                // Draw the map                 
-                DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
 
-                // Draw the inventory
-                ShowInventory();
+                // Run the Update method
+                Update();
 
-                // Set the player's new position
-                Console.SetCursorPosition(playerX, playerY);
-
-                // Draw the player
-                Console.Write('@');
-
-                // Draw the player to the screen
-
-                // Input phase - wait for the player to do something
-                var choice = Console.ReadKey();
-
-                // Bool to check if movement was made 
-                
-
-                // Process the input
-                switch (choice.Key)
+                // Check if the player is on the start screen
+                if (screen.CurrentPhase == Screen.Phase.Start)
                 {
+                    // Draw the start screen, exit until the player chooses another screen
+                    DrawStartMenu();
 
-                    // Move up
-                    case ConsoleKey.UpArrow:
-                        // add coordinates to delta variables
-                        deltaX = 0;
-                        deltaY = -1; 
-                        break;
-
-                    // Move left
-                    case ConsoleKey.LeftArrow:
-                        // add coordinates to delta variables
-                        deltaX = -1;
-                        deltaY = 0;
-                        break;
-
-                    // Move right
-                    case ConsoleKey.RightArrow:
-                        // add coordinates to delta variables
-                        deltaX = 1;
-                        deltaY = 0;                        
-                        break;
-
-                    // Move down
-                    case ConsoleKey.DownArrow:
-                        // add coordinates to delta variables
-                        deltaX = 0;
-                        deltaY = 1;                        
-                        break;
-
-                    // Open door
-                    case ConsoleKey.O:
-                        DrawScreen(MAP_WIDTH, MAP_HEIGHT, mapArray);
-                        //Console.SetCursorPosition(2, 22);
-                        OpenDoorCommand();                        
-                        // do stuff
-                        break;
-
-                    // Close door
-                    case ConsoleKey.C:
-                        // do stuff
-                        break;
-
-                    // Get item
-                    case ConsoleKey.G:
-                        // grab item
-                        
-                        GetCommand();
-                        break;
-
-                    case ConsoleKey.D:
-                        // drop item
-                        DropCommand();
-                        break;
-
-                    // Ignore other keys
-
-                    case ConsoleKey.U:
-                        // use item
-                        UseItemCommand();
-                        break;
-                    default:
-                        break;
                 }
 
-                
-
-                if (isPassable(playerX + deltaX, playerY + deltaY) )
+                if (screen.CurrentPhase == Screen.Phase.Play)
                 {
                     
-                    // If allowed, move in that direction
-                    playerX += deltaX;
-                    playerY += deltaY;
-                    
+
+                    Console.CursorVisible = false;
+                    // Draw the map                 
+                    DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+
+                    // Draw the inventory
+                    ShowInventory();
+
+                    // Set the player's new position
+                    Console.SetCursorPosition(playerX, playerY);
+
+                    // Draw the player
+                    Console.Write('@');
+
+                    // Draw the player to the screen
+
+                    // Input phase - wait for the player to do something
+                    var choice = Console.ReadKey();
+
+                    // Bool to check if movement was made 
+
+
+                    // Process the input
+                    switch (choice.Key)
+                    {
+
+                        // Move up
+                        case ConsoleKey.UpArrow:
+                            // add coordinates to delta variables
+                            deltaX = 0;
+                            deltaY = -1;
+                            break;
+
+                        // Move left
+                        case ConsoleKey.LeftArrow:
+                            // add coordinates to delta variables
+                            deltaX = -1;
+                            deltaY = 0;
+                            break;
+
+                        // Move right
+                        case ConsoleKey.RightArrow:
+                            // add coordinates to delta variables
+                            deltaX = 1;
+                            deltaY = 0;
+                            break;
+
+                        // Move down
+                        case ConsoleKey.DownArrow:
+                            // add coordinates to delta variables
+                            deltaX = 0;
+                            deltaY = 1;
+                            break;
+
+                        // Open door
+                        case ConsoleKey.O:
+                            DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+                            //Console.SetCursorPosition(2, 22);
+                            OpenDoorCommand();
+                            // do stuff
+                            break;
+
+                        // Close door
+                        case ConsoleKey.C:
+                            // do stuff
+                            break;
+
+                        // Get item
+                        case ConsoleKey.G:
+                            // grab item
+
+                            GetCommand();
+                            break;
+
+                        case ConsoleKey.D:
+                            // drop item
+                            DropCommand();
+                            break;
+
+                        // Ignore other keys
+
+                        case ConsoleKey.U:
+                            // use item
+                            UseItemCommand();
+                            break;
+
+                        case ConsoleKey.M:
+                            // pause menu
+                            screen.CurrentPhase = Screen.Phase.Pause;
+                            break;
+
+                        case ConsoleKey.Escape:
+                            // Quit the game
+                            Environment.Exit(0);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+
+
+                    if (isPassable(playerX + deltaX, playerY + deltaY))
+                    {
+
+                        // If allowed, move in that direction
+                        playerX += deltaX;
+                        playerY += deltaY;
+
+                    }
+
                     //clear the delta variables
                     deltaX = 0;
                     deltaY = 0;
-                }              
+
+
+                }
+
+                else if (screen.CurrentPhase == Screen.Phase.Pause)
+                {
+                    // Clear the play menu, draw the pause menu until play is hit again
+                    Console.Clear();
+                    DrawPauseMenu();
+                }
             }
         }
     }

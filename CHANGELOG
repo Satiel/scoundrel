@@ -1,3 +1,11 @@
+2014 2-21-14 Satiel
+	* Fixed a bug where the player would accidentally move upwards/sideways after opening a door
+	* Added a simple menu system
+	* Added a start menu
+	* Added a pause menu
+	* Created a method for reading in levels from a text document and storing them locally
+	* Added in an 'exit application' feature
+
 2014 2-19 Satiel
 	* Added new tile: 
 		*Locked Door
