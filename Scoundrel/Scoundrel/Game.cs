@@ -28,6 +28,7 @@ namespace ConsoleApplication1
         const int TILE_CLOSED_DOOR = 3;
         const int TILE_OPEN_DOOR = 4;
         const int TILE_LOCKED_DOOR = 5;
+        const int TILE_EXIT = 6;
 
         // Item Types
         const int ITEM_NONE = 0;
@@ -40,8 +41,15 @@ namespace ConsoleApplication1
         int playerX = 10;
         int playerY = 10;
 
+        // Player previous position for HEALTH CALCULATION
+        int previousPlayerX = 10;
+        int previousPlayerY = 10;
+
         // Player progress
         int currentLevel = 1;
+
+        // Player health WITH THE DEFAULT POISON WEAKNESS
+        int health = 100;
 
         // Player inventory
         int[] inventory = new int[10] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -78,7 +86,7 @@ namespace ConsoleApplication1
         public int[,] levelOneArray = new int[15, 20];
 
         // Item map, overload on top of the world map
-        public int[,] itemArray = new int[15,20]
+        /*public int[,] itemArray = new int[15,20]
         {
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -95,16 +103,72 @@ namespace ConsoleApplication1
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-	    };
+	    }; */
+
+        public int[,] itemArray = new int[15, 20];
 
         // Screen variables
         Screen screen = null;
-        public char smChoice;
 
-        public void readLevel()
+        public void readLevelItems()
+        {
+            StreamReader sr = new StreamReader("item" + currentLevel + ".txt");
+
+            for (int y = 0; y < MAP_HEIGHT; y++)
+            {
+
+                for (int x = 0; x < MAP_WIDTH; x++)
+                {
+                    int currentChar;
+
+                    currentChar = sr.Read();
+
+
+                    currentChar -= 48;
+
+                    switch (currentChar)
+                    {
+                        case 0:
+                            // Add 0 to array
+                            itemArray[y, x] = 0;
+                            break;
+                        case 1:
+                            itemArray[y, x] = 1;
+                            break;
+                        case 2:
+                            itemArray[y, x] = 2;
+                            break;
+
+                        case 3:
+                            itemArray[y, x] = 3;
+                            break;
+
+                        case 4:
+                            itemArray[y, x] = 4;
+                            break;
+
+                        case 5:
+                            itemArray[y, x] = 5;
+                            break;
+
+                        case 6:
+                            itemArray[y, x] = 6;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                sr.ReadLine();
+            }
+        }
+
+
+        public void readLevelTiles()
         {
             
-            StreamReader sr = new StreamReader("level1.txt");
+            StreamReader sr = new StreamReader("level" + currentLevel +  ".txt");
 
                 // Read the current character
 
@@ -116,7 +180,7 @@ namespace ConsoleApplication1
                     {
                         int currentChar;
 
-                            currentChar = sr.Read();
+                        currentChar = sr.Read();
 
 
                         currentChar -= 48;
@@ -141,6 +205,14 @@ namespace ConsoleApplication1
                            case 4:
                                levelOneArray[y, x] = 4;
                                break; 
+
+                           case 5:
+                               levelOneArray[y, x] = 5;
+                               break;
+
+                           case 6:
+                               levelOneArray[y, x] = 6;
+                               break;
 
                             default:
                                 break;
@@ -179,6 +251,7 @@ namespace ConsoleApplication1
             listIndex.Add(new TileType('/', ConsoleColor.Magenta, false)); // closed door
             listIndex.Add(new TileType('_', ConsoleColor.Magenta, true)); // open door
             listIndex.Add(new TileType('I', ConsoleColor.Magenta, false)); // locked door
+            listIndex.Add(new TileType('X', ConsoleColor.Blue, false)); // room exit
 
             // Add ItemTypes to the ItemIndex
             itemIndex.Add(new ItemType(' ', ConsoleColor.Gray, "EMPTY")); // (0) ITEM_NONE (unused inventory slot)
@@ -226,10 +299,19 @@ namespace ConsoleApplication1
         public void DrawStartMenu()
         {
             Console.SetCursorPosition(10, 10);
+            Console.Write("Welcome to ");
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("This is the start screen. GG.");
+            Console.Write("Scoundrel,");
+            Console.WriteLine();
+            Console.SetCursorPosition(10, 11);
+            Console.ResetColor();
+            Console.WriteLine("the game of thievery and death.");
+            Console.SetCursorPosition(10, 13);
+            Console.WriteLine("(P)lay new game");
+            
 
             // Let the user type
+            Console.SetCursorPosition(10, 15);
             ConsoleKey smKey = Console.ReadKey().Key;
             
             // Change the screen based on the key input
@@ -281,7 +363,7 @@ namespace ConsoleApplication1
 
                 default:
                     // Draw the start screen again until a valid option is chosen
-                    DrawStartMenu();
+                    DrawPauseMenu();
                     break;
             }
         }
@@ -581,6 +663,15 @@ namespace ConsoleApplication1
                     break;
             }
 
+            if (playerX + deltaX < 0 || playerX + deltaX >= MAP_WIDTH ||
+    playerY + deltaY < 0 || playerY + deltaY >= MAP_HEIGHT)
+            {
+                // Let the user know everything went well
+                Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                Console.WriteLine("Can't use that item here!");
+                return;
+            }
+
             if (levelOneArray[playerY + deltaY, playerX + deltaX] != TILE_WALL)
             {
                 // Complain to the user
@@ -649,7 +740,18 @@ namespace ConsoleApplication1
                     break;
             }
 
-            // If there's a locked door, unlocked it
+            // If outside of map, complain
+            if (playerX + deltaX < 0 || playerX + deltaX >= MAP_WIDTH ||
+                playerY + deltaY < 0 || playerY + deltaY >= MAP_HEIGHT)
+                
+            {
+                // Let the user know everything went well
+                Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                Console.WriteLine("Nothing to use the key on!");
+                return;
+            }
+
+            // If there's a locked door, unlock it
             if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_LOCKED_DOOR)
             {
                 // unlock the door
@@ -689,6 +791,77 @@ namespace ConsoleApplication1
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
                 Console.WriteLine("Nothing to use the key on!");
             }
+        }
+
+        public void SwitchRooms()
+        {
+            // Ask the user which direction he wants to axe in
+            Console.SetCursorPosition(2, MAP_HEIGHT + 3);
+            Console.WriteLine("Use exit: which direction?");
+
+            // Get the user input for the direction
+            ConsoleKey key = Console.ReadKey().Key;
+            int deltaX = 0;
+            int deltaY = 0;
+
+            // Compute which tile he user specified
+            switch (key)
+            {
+                // SOUTH
+                case ConsoleKey.NumPad2:
+                    deltaX = 0;
+                    deltaY = 1;
+                    break;
+
+                // WEST
+                case ConsoleKey.NumPad4:
+                    deltaX = -1;
+                    deltaY = 0;
+                    break;
+
+                // EAST
+                case ConsoleKey.NumPad6:
+                    deltaX = 1;
+                    deltaY = 0;
+                    break;
+
+                // NORTH
+                case ConsoleKey.NumPad8:
+                    deltaX = 0;
+                    deltaY = -1;
+                    break;
+
+                // Not a valid direction
+                default:
+                    // no direction specified, so abort
+                    ClearText();
+                    break;
+            }
+
+            if (playerX + deltaX < 0 || playerX + deltaX >= MAP_WIDTH ||
+                 playerY + deltaY < 0 || playerY + deltaY >= MAP_HEIGHT)
+            {
+                // Let the user know everything went well
+                Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                Console.WriteLine("There isn't an exit here!");
+                return;
+            }
+
+            if (levelOneArray[playerY + deltaY, playerX + deltaX] != TILE_EXIT)
+            {
+                // complain about there not being an exit there
+                Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                Console.WriteLine("There isn't an exit here.");
+                return;
+            }
+
+            // Change the current level
+            currentLevel++;
+
+            // Import the new level
+            readLevelTiles();
+            readLevelItems();
+
         }
 
     
@@ -732,15 +905,59 @@ namespace ConsoleApplication1
         public void Main()
         {
 
+            //Console.SetWindowSize(85,43);
 
-            readLevel();
+            readLevelTiles();
+            readLevelItems();
 
             // delta movement variables
             int deltaX = 0;
             int deltaY = 0;
 
+            // Create an NPC
+            Actor npc = new Actor(levelOneArray);
+            npc.setAppearance('@', ConsoleColor.Red);
+            npc.setPos(3, 3);
+
             while (true)
             {
+
+                if (health <= 0)
+                {
+                    // Let the user know that they lost
+                    // Ask if they would like to play again
+                    Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                    Console.WriteLine("You have died, you riff-raff. Try again? (Y/N)");
+
+                    ConsoleKey key = ConsoleKey.D;
+                    while (key != ConsoleKey.Y || key != ConsoleKey.N)
+                    {
+                        key = Console.ReadKey().Key;
+                        switch (key)
+                        {
+                            case ConsoleKey.Y:
+                                currentLevel = 1;
+                                inventory = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                                ClearText();
+                                playerX = 10;
+                                playerY = 10;
+                                health = 100;
+                                Main();
+                                break;
+                            case ConsoleKey.N:
+                                Environment.Exit(0);
+                                break;
+                            default:
+                                Console.WriteLine("You have died, you riff-raff. Try again? (Y/N)");
+                                break;
+                        }
+                    }
+
+
+                    
+
+
+                }
 
                 // Run the Update method
                 Update();
@@ -753,7 +970,7 @@ namespace ConsoleApplication1
 
                 }
 
-                if (screen.CurrentPhase == Screen.Phase.Play)
+                else if (screen.CurrentPhase == Screen.Phase.Play)
                 {
                     
 
@@ -764,11 +981,42 @@ namespace ConsoleApplication1
                     // Draw the inventory
                     ShowInventory();
 
+                    // Draw the player's health
+                    
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 1);
+                    Console.Write("Health: " + health.ToString() + ' ' + ' ');
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 2);
+                    Console.WriteLine("------------");
+
+                    // Draw the controls of the game
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 5);
+                    Console.WriteLine("Controls:");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 6);
+                    Console.WriteLine("------------");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 8);
+                    Console.WriteLine("(O)pen Door");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 9);
+                    Console.WriteLine("(G)rab Item");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 10);
+                    Console.WriteLine("(D)rop Item");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 11);
+                    Console.WriteLine("(U)se Item");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 12);
+                    Console.WriteLine("(M)enu");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 13);
+                    Console.WriteLine("(S)witch Rooms (at an exit)");
+                    Console.SetCursorPosition(MAP_WIDTH + 20, 14);
+                    Console.WriteLine("(Esc)ape - exit game");
+
                     // Set the player's new position
                     Console.SetCursorPosition(playerX, playerY);
 
                     // Draw the player
                     Console.Write('@');
+
+                    // Draw the npc
+                    npc.Update();
+                    npc.Draw();
 
                     // Draw the player to the screen
 
@@ -852,6 +1100,11 @@ namespace ConsoleApplication1
                             Environment.Exit(0);
                             break;
 
+                        case ConsoleKey.S:
+                            // Switch rooms
+                            SwitchRooms();
+                            break;
+
                         default:
                             break;
                     }
@@ -860,10 +1113,26 @@ namespace ConsoleApplication1
 
                     if (isPassable(playerX + deltaX, playerY + deltaY))
                     {
+                        previousPlayerX = playerX;
+                        previousPlayerY = playerY;
+
 
                         // If allowed, move in that direction
                         playerX += deltaX;
                         playerY += deltaY;
+
+                        
+                        // FOR THE POISON WEAKNESS, HEALTH GOES DOWN BY 1
+
+                        if (previousPlayerX == playerX && previousPlayerY == playerY)
+                        {
+
+                        }
+
+                        else
+                        {
+                            health--;
+                        }
 
                     }
 

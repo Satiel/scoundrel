@@ -1,3 +1,21 @@
+2014 2-22-14 Satiel
+	* Added NPC feature
+	* Created a method for reading the items from a text document, similar to levels
+	* Fixed bug that allowed players to use an item on a tile that was
+		out of bounds
+	* Fixed a bug that caused certain tiles to not be displayed properly
+	* Fixed big where Pause Menu affected character's health
+	* Added UI elements
+		* Control binding
+		* Player's current health
+	* Added escape feature
+	* Added new user interaction:
+		* Switch rooms - player can now descend into a new room at marked exits
+	* Fixed bug with NPC class where variables being passed into the
+		default constructor were being mirrored to internal variables
+		instead of assigned to them, i.e. this.array = passedInArray would 
+		create a constant mirror instead of a one-time assignment
+
 2014 2-21-14 Satiel
 	* Fixed a bug where the player would accidentally move upwards/sideways after opening a door
 	* Added a simple menu system
