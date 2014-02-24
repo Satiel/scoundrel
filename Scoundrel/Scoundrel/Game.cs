@@ -12,6 +12,8 @@ namespace ConsoleApplication1
     class Game : IDisposable
     {
 
+
+        int keySlot = 0;
         public void Dispose()
         {
             listIndex.Clear();
@@ -341,7 +343,9 @@ namespace ConsoleApplication1
         {
             Console.SetCursorPosition(10, 10);
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("This is the pause menu.");
+            Console.WriteLine("Game is paused. Press (P)lay to resume game.");
+            
+
 
             // Let the user type
             ConsoleKey smKey = Console.ReadKey().Key;
@@ -371,8 +375,8 @@ namespace ConsoleApplication1
         public void OpenDoorCommand()
         {
             // Draw some notifcation to the user
-
-            Console.WriteLine("Which direction? (2, 4, 6, 8)");
+            Console.SetCursorPosition(0, 17);
+            Console.WriteLine("Which direction? (Up, Down, Left, Right)");
             ConsoleKey key = Console.ReadKey().Key;
 
             // set delta coords for future door coords
@@ -383,28 +387,29 @@ namespace ConsoleApplication1
             {
 
                 // NORT
-                case ConsoleKey.NumPad0:
+                case ConsoleKey.UpArrow:
+                    
                     // add coordinates to delta variables
                     deltaX = 0;
                     deltaY = -1;
                     break;
 
                 // WEST
-                case ConsoleKey.NumPad4:
+                case ConsoleKey.LeftArrow:
                     // add coordinates to delta variables
                     deltaX = -1;
                     deltaY = 0;
                     break;
 
                 // EAST
-                case ConsoleKey.NumPad6:
+                case ConsoleKey.RightArrow:
                     // add coordinates to delta variables
                     deltaX = 1;
                     deltaY = 0;
                     break;
 
                 // EAST
-                case ConsoleKey.NumPad2:
+                case ConsoleKey.DownArrow:
                     // add coordinates to delta variables
                     deltaX = 0;
                     deltaY = 1;
@@ -424,9 +429,105 @@ namespace ConsoleApplication1
                 DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
             }
 
+            else
+            {
+                if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_LOCKED_DOOR)
+                {
+                    //DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+                    Console.WriteLine("The door is locked! Find a key!");
+
+                    // Wait 2 seconds and then delete the message
+                    System.Threading.Thread.Sleep(2500);
+                    ClearText();
+                }
+
+                else
+                {
+                    //DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+                    Console.WriteLine("There isn't a closed door here!");
+
+                    // Wait 2 seconds and then delete the message
+                    System.Threading.Thread.Sleep(2500);
+                    ClearText();
+                }
+
+
+            }
+
         }
 
         // CREATE CLOSE DOOR FUNCTION
+        public void CloseDoorCommand()
+        {
+            // Draw some notifcation to the user
+            Console.SetCursorPosition(0, 17);
+            Console.WriteLine("Which direction? (Up, Down, Left, Right)");
+            ConsoleKey key = Console.ReadKey().Key;
+
+            // set delta coords for future door coords
+            int deltaX = 0;
+            int deltaY = 0;
+
+            switch (key)
+            {
+
+                // NORT
+                case ConsoleKey.UpArrow:
+                    // add coordinates to delta variables
+                    deltaX = 0;
+                    deltaY = -1;
+                    break;
+
+                // WEST
+                case ConsoleKey.LeftArrow:
+                    // add coordinates to delta variables
+                    deltaX = -1;
+                    deltaY = 0;
+                    break;
+
+                // EAST
+                case ConsoleKey.RightArrow:
+                    // add coordinates to delta variables
+                    deltaX = 1;
+                    deltaY = 0;
+                    break;
+
+                // EAST
+                case ConsoleKey.DownArrow:
+                    // add coordinates to delta variables
+                    deltaX = 0;
+                    deltaY = 1;
+                    break;
+
+                // Not a valid direction
+                default:
+                    // No direction specified, so abort
+                    break;
+            }
+
+            if (levelOneArray[playerY + deltaY, playerX + deltaX] == TILE_OPEN_DOOR)
+            {
+
+                levelOneArray[playerY + deltaY, playerX + deltaX] = TILE_CLOSED_DOOR;
+                Console.Clear();
+                DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+            }
+
+            else
+
+            {
+                //DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+                Console.WriteLine("There isn't an open door here!");
+
+                // Wait 2 seconds and then delete the message
+                System.Threading.Thread.Sleep(2500);
+                ClearText();
+
+
+            }
+
+        }
+
 
         // display the player's inventory
         public void ShowInventory()
@@ -539,6 +640,10 @@ namespace ConsoleApplication1
                 inventory[slot] = ITEM_NONE;
             }
 
+            // Wait 2 seconds and then delete the message
+            System.Threading.Thread.Sleep(2500);
+            ClearText();
+
         }
 
         public void UseItemCommand()
@@ -583,13 +688,24 @@ namespace ConsoleApplication1
 
                 case ITEM_POTION:
                     // Give a message to the user
-                    Console.SetCursorPosition(2, MAP_HEIGHT + 3);
-                    Console.WriteLine("You drank the potion. *burp!*");
-
-                    // Remove the item from the inventory
                     
                     inventory[slot] = ITEM_NONE;
                     ClearText();
+                    Console.SetCursorPosition(2, MAP_HEIGHT + 3);
+                    Console.WriteLine("You drank the potion. *burp!*");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                    Console.WriteLine("Your health went up by 50");
+                    health += 50;
+
+                    // Wait 2 seconds and then delete the message
+                    System.Threading.Thread.Sleep(2500);
+                    ClearText();
+
+                    // Remove the item from the inventory
+                    
+                    
+                    //ClearText();
 
 
                     break;
@@ -601,6 +717,7 @@ namespace ConsoleApplication1
 
                 case ITEM_KEY:
                     // Use the key
+                    keySlot = slot;
                     UseKey();
                     break;
 
@@ -609,11 +726,12 @@ namespace ConsoleApplication1
                     // Complain to the user
                     Console.SetCursorPosition(2, MAP_HEIGHT + 3);
                     Console.WriteLine("Don't know how to use this item!");
+
+                    // Wait 2 seconds and then delete the message
+                    System.Threading.Thread.Sleep(2500);
+                    ClearText();
                     break;
             }
-
-
-
 
         }
 
@@ -633,25 +751,25 @@ namespace ConsoleApplication1
             switch (key)
             {
                 // SOUTH
-                case ConsoleKey.NumPad2:
+                case ConsoleKey.DownArrow:
                     deltaX = 0;
                     deltaY = 1;
                     break;
 
                 // WEST
-                case ConsoleKey.NumPad4:
+                case ConsoleKey.LeftArrow:
                     deltaX = -1;
                     deltaY = 0;
                     break;
                 
                 // EAST
-                case ConsoleKey.NumPad6:
+                case ConsoleKey.RightArrow:
                     deltaX = 1;
                     deltaY = 0;
                     break;
 
                 // NORTH
-                case ConsoleKey.NumPad8:
+                case ConsoleKey.UpArrow:
                     deltaX = 0;
                     deltaY = -1;
                     break;
@@ -669,6 +787,10 @@ namespace ConsoleApplication1
                 // Let the user know everything went well
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
                 Console.WriteLine("Can't use that item here!");
+
+                // Wait 2 seconds and then delete the message
+                System.Threading.Thread.Sleep(2500);
+                ClearText();
                 return;
             }
 
@@ -678,7 +800,9 @@ namespace ConsoleApplication1
                 ClearText();
                 Console.SetCursorPosition(2, MAP_HEIGHT + 3);
                 Console.WriteLine("Can't use that item here!");
-
+                // Wait 2 seconds and then delete the message
+                System.Threading.Thread.Sleep(2500);
+                ClearText();
                
                 return;
             }
@@ -689,8 +813,16 @@ namespace ConsoleApplication1
             // place a rock there to simulate rubble
             itemArray[playerY + deltaY, playerX + deltaX] = ITEM_ROCK;
 
+            // Let the user know the wall has been smashed, along with his health
             Console.SetCursorPosition(2, MAP_HEIGHT + 4);
             Console.WriteLine("You smash the stone to pieces.");
+            Console.SetCursorPosition(2, MAP_HEIGHT + 6);
+            Console.WriteLine("Use the axe has drained you of 20 health!");
+            health -= 20;
+
+            // Wait 2 seconds and then delete the message
+            System.Threading.Thread.Sleep(2500);
+            ClearText();
         }
 
         public void UseKey()
@@ -708,30 +840,28 @@ namespace ConsoleApplication1
             switch (key)
             {
                 // SOUTH
-                case ConsoleKey.NumPad2:
+                case ConsoleKey.DownArrow:
                     deltaX = 0;
                     deltaY = 1;
                     break;
 
                 // WEST
-                case ConsoleKey.NumPad4:
+                case ConsoleKey.LeftArrow:
                     deltaX = -1;
                     deltaY = 0;
                     break;
 
                 // EAST
-                case ConsoleKey.NumPad6:
+                case ConsoleKey.RightArrow:
                     deltaX = 1;
                     deltaY = 0;
                     break;
 
                 // NORTH
-                case ConsoleKey.NumPad8:
+                case ConsoleKey.UpArrow:
                     deltaX = 0;
                     deltaY = -1;
                     break;
-
-
 
                 // Not a valid direction
                 default:
@@ -758,8 +888,12 @@ namespace ConsoleApplication1
                 levelOneArray[playerY + deltaY, playerX + deltaX] = TILE_CLOSED_DOOR;
 
                 // Let the user know everything went well
+                inventory[keySlot] = ITEM_NONE;
+                ClearText();
+                Console.SetCursorPosition(2, MAP_HEIGHT + 3);
+                Console.WriteLine("You unlock the door with the key!");
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
-                Console.WriteLine("You unlock the door with the key.");
+                Console.WriteLine("The key mysteriously vanished...");
         
 
             }
@@ -791,6 +925,10 @@ namespace ConsoleApplication1
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
                 Console.WriteLine("Nothing to use the key on!");
             }
+
+            // Wait 2 seconds and then delete the message
+            System.Threading.Thread.Sleep(2500);
+            ClearText();
         }
 
         public void SwitchRooms()
@@ -808,25 +946,25 @@ namespace ConsoleApplication1
             switch (key)
             {
                 // SOUTH
-                case ConsoleKey.NumPad2:
+                case ConsoleKey.DownArrow:
                     deltaX = 0;
                     deltaY = 1;
                     break;
 
                 // WEST
-                case ConsoleKey.NumPad4:
+                case ConsoleKey.LeftArrow:
                     deltaX = -1;
                     deltaY = 0;
                     break;
 
                 // EAST
-                case ConsoleKey.NumPad6:
+                case ConsoleKey.RightArrow:
                     deltaX = 1;
                     deltaY = 0;
                     break;
 
                 // NORTH
-                case ConsoleKey.NumPad8:
+                case ConsoleKey.UpArrow:
                     deltaX = 0;
                     deltaY = -1;
                     break;
@@ -844,6 +982,10 @@ namespace ConsoleApplication1
                 // Let the user know everything went well
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
                 Console.WriteLine("There isn't an exit here!");
+
+                // Wait 2 seconds and then delete the message
+                System.Threading.Thread.Sleep(2500);
+                ClearText();
                 return;
             }
 
@@ -852,8 +994,14 @@ namespace ConsoleApplication1
                 // complain about there not being an exit there
                 Console.SetCursorPosition(2, MAP_HEIGHT + 4);
                 Console.WriteLine("There isn't an exit here.");
+
+                // Wait 2 seconds and then delete the message
+                System.Threading.Thread.Sleep(2500);
+                ClearText();
                 return;
             }
+
+            ClearText();
 
             // Change the current level
             currentLevel++;
@@ -904,9 +1052,7 @@ namespace ConsoleApplication1
 
         public void Main()
         {
-
-            //Console.SetWindowSize(85,43);
-
+            // At the start of the game, read the current level's tiles and items text documents
             readLevelTiles();
             readLevelItems();
 
@@ -915,12 +1061,17 @@ namespace ConsoleApplication1
             int deltaY = 0;
 
             // Create an NPC
-            Actor npc = new Actor(levelOneArray);
-            npc.setAppearance('@', ConsoleColor.Red);
-            npc.setPos(3, 3);
+            //Actor npc = new Actor(levelOneArray);
+            //npc.setAppearance('@', ConsoleColor.Red);
+            //npc.setPos(3, 3);
 
             while (true)
             {
+                if (currentLevel == 5)
+                {
+                    Console.SetCursorPosition(2, MAP_HEIGHT + 4);
+                    Console.WriteLine("Happy Anniversary, babe. I love you.");
+                }
 
                 if (health <= 0)
                 {
@@ -936,6 +1087,8 @@ namespace ConsoleApplication1
                         switch (key)
                         {
                             case ConsoleKey.Y:
+                                // Reset the level, inventory, player position and health
+                                // and start a new game
                                 currentLevel = 1;
                                 inventory = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                                 ClearText();
@@ -944,19 +1097,17 @@ namespace ConsoleApplication1
                                 health = 100;
                                 Main();
                                 break;
+
                             case ConsoleKey.N:
+                                // Exit the game
                                 Environment.Exit(0);
                                 break;
                             default:
+                                // Continue to complain until the player picks yes or no
                                 Console.WriteLine("You have died, you riff-raff. Try again? (Y/N)");
                                 break;
                         }
                     }
-
-
-                    
-
-
                 }
 
                 // Run the Update method
@@ -973,7 +1124,6 @@ namespace ConsoleApplication1
                 else if (screen.CurrentPhase == Screen.Phase.Play)
                 {
                     
-
                     Console.CursorVisible = false;
                     // Draw the map                 
                     DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
@@ -982,7 +1132,7 @@ namespace ConsoleApplication1
                     ShowInventory();
 
                     // Draw the player's health
-                    
+                    // This needs to be moved to the drawScreen function
                     Console.SetCursorPosition(MAP_WIDTH + 20, 1);
                     Console.Write("Health: " + health.ToString() + ' ' + ' ');
                     Console.SetCursorPosition(MAP_WIDTH + 20, 2);
@@ -1015,8 +1165,8 @@ namespace ConsoleApplication1
                     Console.Write('@');
 
                     // Draw the npc
-                    npc.Update();
-                    npc.Draw();
+                    //npc.Update();
+                    //npc.Draw();
 
                     // Draw the player to the screen
 
@@ -1060,21 +1210,38 @@ namespace ConsoleApplication1
 
                         // Open door
                         case ConsoleKey.O:
-                            DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
-                            //Console.SetCursorPosition(2, 22);
+                            // Draw the screen
+                            //DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+
+                            // Set the cursor to the player so we can draw him
+                            //Console.SetCursorPosition(playerX, playerY);
+
+                            // Draw the player
+                            //Console.Write('@');
+                             
+                            // Open the door
                             OpenDoorCommand();
-                            // do stuff
                             break;
 
                         // Close door
                         case ConsoleKey.C:
-                            // do stuff
+                            // Draw the screen
+                            DrawScreen(MAP_WIDTH, MAP_HEIGHT, levelOneArray);
+
+                            // Set the player's new position
+                            Console.SetCursorPosition(playerX, playerY);
+
+                            // Draw the player
+                            Console.Write('@');
+
+                            // Close the door
+                            CloseDoorCommand();
+
                             break;
 
                         // Get item
                         case ConsoleKey.G:
                             // grab item
-
                             GetCommand();
                             break;
 
@@ -1088,6 +1255,7 @@ namespace ConsoleApplication1
                         case ConsoleKey.U:
                             // use item
                             UseItemCommand();
+
                             break;
 
                         case ConsoleKey.M:
@@ -1123,7 +1291,6 @@ namespace ConsoleApplication1
 
                         
                         // FOR THE POISON WEAKNESS, HEALTH GOES DOWN BY 1
-
                         if (previousPlayerX == playerX && previousPlayerY == playerY)
                         {
 

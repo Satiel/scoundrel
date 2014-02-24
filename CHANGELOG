@@ -1,3 +1,10 @@
+2014 2-23-14 Satiel
+	* Fixed some issues with text being left over on screen after user interactions
+	* Added some test levels
+	* Added functionality to potions - they now heal 50HP
+	* Added a wait time to messages being given to the player, so that they
+		have time to read the results of their action
+
 2014 2-22-14 Satiel
 	* Added NPC feature
 	* Created a method for reading the items from a text document, similar to levels
